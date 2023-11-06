@@ -1,3 +1,4 @@
+require("dotenv").config();
 const health = require("./routes");
 const user = require("./routes/user");
 const mongoose = require("mongoose");
@@ -13,6 +14,9 @@ mongoose
   .catch((err) => {
     console.log("Error: ", err.message);
   });
+
+// middlewares
+app.use(express.json());
 
 // routes
 app.use("/", health);
