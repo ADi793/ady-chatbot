@@ -1,0 +1,12 @@
+{
+  "name": "chatbot-backend",
+  "version": "1.0.0",
+  "description": "\"Well structured chatbot services\"",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
