@@ -14,7 +14,7 @@ router.post("/auth", async (req, res) => {
     }
 
     user = new User(req.body);
-    await user.save();
+    const newUser = await user.save();
 
     res.json({ auth_token: user.generateAuthToken() });
   } catch (error) {

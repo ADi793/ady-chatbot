@@ -16,6 +16,18 @@ const userSchema = new mongoose.Schema({
     minLength: 5,
     maxLength: 255,
   },
+  chats: [
+    {
+      question: {
+        type: String,
+        required: true,
+      },
+      answer: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
 userSchema.methods.generateAuthToken = function (cb) {

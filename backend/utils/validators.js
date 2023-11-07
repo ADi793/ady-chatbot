@@ -5,6 +5,4 @@ const validateUser = Joi.object({
   email: Joi.string().email().min(5).max(255).required(),
 });
 
-console.log(validateUser.validate({ name: "a" }).error.details);
-
 module.exports.validateUser = validateUser;
