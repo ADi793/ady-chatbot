@@ -1,37 +1,15 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import { Grid, useFormControlStyles } from "@chakra-ui/react";
+import { useState } from "react";
+import { Grid } from "@chakra-ui/react";
 import History from "../components/History";
 import Chats from "../components/Chats";
-import axios from "axios";
-import { getFromLocalStorage } from "../utils/localStorage";
-import { AUTH_KEY } from "../utils/constants";
 import { getRecent } from "../utils/list";
+import ChatHistoryContext from "../contexts/ChatHistoryContext";
+import RecentChatsContext from "../contexts/RecentChatsContext";
+import useChatsHistory from "../hooks/useChatsHistory";
 
 function HomePage() {
-  const [chatsHistory, setChatsHistory] = useState([]);
+  const { chatsHistory, setChatsHistory } = useChatsHistory();
   const [recentChats, setRecentChats] = useState(getRecent(chatsHistory, 5));
-  const navigate = useNavigate();
-  const user = useAuth();
-
-  useEffect(() => {
-    if (!user) return navigate("/auth/login");
-
-    axios
-      .get("http://localhost:3001/api/user/me", {
-        headers: {
-          "auth-token": getFromLocalStorage(AUTH_KEY),
-        },
-      })
-      .then(({ data }) => {
-        setChatsHistory(data.user.chats.reverse());
-        // console.log("res", res);
-      })
-      .catch((error) => {
-        console.log("Error occured: ", error.message);
-      });
-  }, [user]);
 
   return (
     <Grid
@@ -46,17 +24,12 @@ function HomePage() {
       paddingLeft="15px"
       paddingTop="25px"
     >
-      <History
-        chatsHistory={chatsHistory}
-        recentChats={recentChats}
-        setRecentChats={setRecentChats}
-      />
-      <Chats
-        chatsHistory={chatsHistory}
-        setChatsHistory={setChatsHistory}
-        recentChats={recentChats}
-        setRecentChats={setRecentChats}
-      />
+      <ChatHistoryContext.Provider value={{ chatsHistory, setChatsHistory }}>
+        <RecentChatsContext.Provider value={{ recentChats, setRecentChats }}>
+          <History />
+          <Chats />
+        </RecentChatsContext.Provider>
+      </ChatHistoryContext.Provider>
     </Grid>
   );
 }

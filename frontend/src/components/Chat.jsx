@@ -19,21 +19,13 @@ const Chat = ({ chat }) => {
       </HStack>
       <hr />
       <HStack bg="gray.100" paddingY="12px" paddingLeft={6} paddingRight={2}>
-        {/* <Avatar
-          borderRadius="12px"
-          size="md"
-          name="Adil Siddiqui"
-          colorScheme="green.800"
-          display="flex"
-          alignSelf="start"
-        /> */}
         <Icon as={SiChatbot} boxSize={12} alignSelf="start" />
         {chat.answer ? (
           <Text
             fontWeight="normal"
             as="pre"
             style={{
-              whiteSpace: "pre-wrap", // Enable text wrapping
+              whiteSpace: "pre-wrap",
             }}
           >
             {chat.answer}

@@ -1,29 +1,28 @@
 import { GoogleLogin } from "@react-oauth/google";
-import { Box } from "@chakra-ui/react";
+import { Box, useToast } from "@chakra-ui/react";
 import { jwtDecode } from "jwt-decode";
-import axios from "axios";
 import { setToLocalStorage } from "../utils/localStorage";
-import { AUTH_KEY } from "../utils/constants";
-import { useNavigate } from "react-router-dom";
+import { AUTH_KEY, UNEXPECTED_ERROR } from "../utils/constants";
+import apiClient from "../services/apiClient";
+import getToastConfig from "../utils/getToastConfig";
 
 function Login() {
-  const navigate = useNavigate();
+  const toast = useToast();
 
   const onSucess = async (credentialResponse) => {
     try {
       const { name, email } = jwtDecode(credentialResponse.credential);
-      const { data } = await axios.post("http://localhost:3001/api/user/auth", {
-        name,
-        email,
-      });
-
-      console.log(data);
+      const { data } = await apiClient.post("/user/auth", { name, email });
 
       setToLocalStorage(AUTH_KEY, data.auth_token);
       window.location = "/";
     } catch (error) {
-      console.log("Error occured...");
+      toast(getToastConfig(UNEXPECTED_ERROR));
     }
+  };
+
+  const onError = () => {
+    toast(getToastConfig(UNEXPECTED_ERROR));
   };
 
   return (
@@ -34,13 +33,7 @@ function Login() {
       alignItems="center"
       justifyContent="center"
     >
-      <GoogleLogin
-        onSuccess={onSucess}
-        onError={() => {
-          console.log("Login Failed");
-        }}
-        auto_select={false}
-      />
+      <GoogleLogin onSuccess={onSucess} onError={onError} auto_select={false} />
     </Box>
   );
 }

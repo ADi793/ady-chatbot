@@ -5,53 +5,56 @@ import {
   InputGroup,
   InputRightElement,
   Textarea,
-  Avatar,
-  HStack,
-  Text,
+  useToast,
 } from "@chakra-ui/react";
 import { MdSend } from "react-icons/md";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import useAuth from "../hooks/useAuth";
 import Chat from "./Chat";
 import { getFromLocalStorage } from "../utils/localStorage";
-import { AUTH_KEY } from "../utils/constants";
-import axios from "axios";
+import {
+  AUTH_KEY,
+  CHAT_ANSWER,
+  CHAT_QUESTION,
+  JOIN,
+  UNEXPECTED_ERROR,
+} from "../utils/constants";
 import { getRecent } from "../utils/list";
+import ChatHistoryContext from "../contexts/ChatHistoryContext";
+import RecentChatsContext from "../contexts/RecentChatsContext";
+import apiClient from "../services/apiClient";
+import getToastConfig from "../utils/getToastConfig";
 
-const socket = io("http://localhost:3001/");
+const socket = io(import.meta.env.VITE_BACKEND_SERVICES);
 
-const Chats = ({
-  chatsHistory,
-  setChatsHistory,
-  recentChats,
-  setRecentChats,
-}) => {
+const Chats = () => {
+  const { chatsHistory, setChatsHistory } = useContext(ChatHistoryContext);
+  const { recentChats, setRecentChats } = useContext(RecentChatsContext);
+
   const user = useAuth();
   const [question, setQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
-    socket.emit("join", `user_${user.email}`);
-    socket.on("chat_answer", async (chat) => {
+    socket.emit(JOIN, `user_${user.email}`);
+    socket.on(CHAT_ANSWER, async (chat) => {
       try {
         setIsLoading(false);
         setQuestion("");
         setRecentChats((prev) =>
           prev.map((recentChat) => (recentChat.answer ? recentChat : chat))
         );
-        const savedChat = await axios.post(
-          "http://localhost:3001/api/user/chats",
-          chat,
-          {
-            headers: {
-              "auth-token": getFromLocalStorage(AUTH_KEY),
-            },
-          }
-        );
-        setChatsHistory((prev) => [chat, ...prev]);
+
+        const savedChat = await apiClient.post("/user/chats", chat, {
+          headers: {
+            [AUTH_KEY]: getFromLocalStorage(AUTH_KEY),
+          },
+        });
+        setChatsHistory((prev) => [savedChat, ...prev]);
       } catch (error) {
-        console.log("Error: ", error.message);
+        toast(getToastConfig(UNEXPECTED_ERROR));
       }
     });
 
@@ -67,7 +70,7 @@ const Chats = ({
   const handleChatSubmit = () => {
     setIsLoading(true);
     setRecentChats([...recentChats, { question }]);
-    socket.emit("chat_question", {
+    socket.emit(CHAT_QUESTION, {
       auth_token: getFromLocalStorage(AUTH_KEY),
       data: {
         question,

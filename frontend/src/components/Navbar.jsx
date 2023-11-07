@@ -8,9 +8,7 @@ import { googleLogout } from "@react-oauth/google";
 import { SiChatbot } from "react-icons/si";
 
 const Navbar = () => {
-  console.log("navbar is rendering...");
   const user = useAuth();
-  // const navigate = useNavigate();
 
   const handleLogout = () => {
     googleLogout();

@@ -35,4 +35,4 @@ const io = require("socket.io")(server, {
   },
 });
 
-io.on("connection", socketHandler);
+io.on("connection", socketHandler(io));

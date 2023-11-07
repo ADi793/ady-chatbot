@@ -11,8 +11,16 @@ import {
 } from "@chakra-ui/react";
 import { TbMessageChatbot } from "react-icons/tb";
 import useAuth from "../hooks/useAuth";
+import { useContext } from "react";
+import ChatHistoryContext from "../contexts/ChatHistoryContext";
+import getToastConfig from "../utils/getToastConfig";
+import { CHAT_OPEN, CHAT_OPENED } from "../utils/constants";
+import RecentChatsContext from "../contexts/RecentChatsContext";
 
-const History = ({ chatsHistory, recentChats, setRecentChats }) => {
+const History = () => {
+  const { chatsHistory } = useContext(ChatHistoryContext);
+  const { recentChats, setRecentChats } = useContext(RecentChatsContext);
+
   const user = useAuth();
   const toast = useToast();
 
@@ -22,23 +30,10 @@ const History = ({ chatsHistory, recentChats, setRecentChats }) => {
     );
 
     if (recentChat) {
-      toast({
-        title: "Already Opened.",
-        description:
-          "We've already opened for you please scroll the chats to see.",
-        status: "success",
-        duration: 1500,
-        isClosable: true,
-      });
+      toast(getToastConfig(CHAT_OPENED));
     } else {
       setRecentChats((prev) => [...prev, chat]);
-      toast({
-        title: "Chat Opened.",
-        description: "We've opened for you please scroll the chats to see.",
-        status: "success",
-        duration: 1500,
-        isClosable: true,
-      });
+      toast(getToastConfig(CHAT_OPEN));
     }
   };
 
@@ -54,16 +49,7 @@ const History = ({ chatsHistory, recentChats, setRecentChats }) => {
               paddingBottom={4}
               cursor="pointer"
               key={chat._id}
-              onClick={
-                () => handleHistoryChatClick(chat)
-                // toast({
-                //   title: "Account created.",
-                //   description: "We've created your account for you.",
-                //   status: "success",
-                //   duration: 1500,
-                //   isClosable: true,
-                // })
-              }
+              onClick={() => handleHistoryChatClick(chat)}
             >
               <HStack>
                 <Icon as={TbMessageChatbot} boxSize={6} />
@@ -89,8 +75,8 @@ const History = ({ chatsHistory, recentChats, setRecentChats }) => {
         width="265px"
         bg="blackAlpha.900"
       >
-        <Avatar size="md" name={user.name} borderRadius="12px" />
-        <Text color="white">{user.name}</Text>
+        <Avatar size="md" name={user?.name} borderRadius="12px" />
+        <Text color="white">{user?.name}</Text>
       </HStack>
     </Box>
   );
