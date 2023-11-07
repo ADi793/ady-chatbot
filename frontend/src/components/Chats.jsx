@@ -8,7 +8,7 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { MdSend } from "react-icons/md";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import useAuth from "../hooks/useAuth";
 import Chat from "./Chat";
@@ -35,6 +35,7 @@ const Chats = () => {
   const user = useAuth();
   const [question, setQuestion] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const chatsRef = useRef();
   const toast = useToast();
 
   useEffect(() => {
@@ -84,6 +85,7 @@ const Chats = () => {
       overflowY="scroll"
       overflowX="hidden"
       paddingTop="52px"
+      ref={chatsRef}
     >
       <Box>
         <Box>
