@@ -1,5 +1,5 @@
 import { Button, HStack, Heading, Icon } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { removeFromLocalStorage } from "../utils/localStorage";
@@ -8,14 +8,17 @@ import { googleLogout } from "@react-oauth/google";
 import { SiChatbot } from "react-icons/si";
 
 const Navbar = () => {
+  console.log("navbar is rendering...");
   const user = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const handleLogout = () => {
     googleLogout();
     removeFromLocalStorage(AUTH_KEY);
-    navigate("/auth/login");
+    window.location = "/auth/login";
   };
+
+  useEffect(() => {}, [useAuth()]);
 
   return (
     <HStack

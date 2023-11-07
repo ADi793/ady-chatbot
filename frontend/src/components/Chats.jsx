@@ -16,57 +16,56 @@ import useAuth from "../hooks/useAuth";
 import Chat from "./Chat";
 import { getFromLocalStorage } from "../utils/localStorage";
 import { AUTH_KEY } from "../utils/constants";
+import axios from "axios";
+import { getRecent } from "../utils/list";
 
-const socket = io("http://localhost:3001/", {
-  auth: {
-    token: "abc",
-  },
-});
+const socket = io("http://localhost:3001/");
 
-const Chats = () => {
+const Chats = ({
+  chatsHistory,
+  setChatsHistory,
+  recentChats,
+  setRecentChats,
+}) => {
   const user = useAuth();
   const [question, setQuestion] = useState("");
-  const [recentChats, setRecentChats] = useState([
-    {
-      question: "hy",
-      answer: "hy",
-    },
-    {
-      question: "how are you",
-      answer:
-        "kdjfkl ajkfdj fjkd jfkdajflkdjfkadsl; jfkldsja flkd jkfdlaj fdlkjf lkdjf dklj         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat                 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat.         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minus, placeat.        ",
-    },
-  ]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     socket.emit("join", `user_${user.email}`);
-    socket.on("greeting", (message) => {
-      console.log(message);
-    });
-    socket.on("chat_answer", (chat) => {
-      console.log("chat", chat);
-      setIsLoading(false);
-      setQuestion("");
-      const newChats = recentChats.map((recentChat) => {
-        console.log("recentChat", recentChat);
-        return recentChat.answer ? recentChat : chat;
-      });
-
-      console.log("newChats", newChats);
-
-      setRecentChats((prev) =>
-        prev.map((recentChat) => (recentChat.answer ? recentChat : chat))
-      );
+    socket.on("chat_answer", async (chat) => {
+      try {
+        setIsLoading(false);
+        setQuestion("");
+        setRecentChats((prev) =>
+          prev.map((recentChat) => (recentChat.answer ? recentChat : chat))
+        );
+        const savedChat = await axios.post(
+          "http://localhost:3001/api/user/chats",
+          chat,
+          {
+            headers: {
+              "auth-token": getFromLocalStorage(AUTH_KEY),
+            },
+          }
+        );
+        setChatsHistory((prev) => [chat, ...prev]);
+      } catch (error) {
+        console.log("Error: ", error.message);
+      }
     });
 
     return () => socket.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (recentChats.length === 0) {
+      setRecentChats(getRecent(chatsHistory, 5));
+    }
+  }, [chatsHistory]);
+
   const handleChatSubmit = () => {
     setIsLoading(true);
-    console.log("getFromLocalStorage(AUTH_KEY)", getFromLocalStorage(AUTH_KEY));
-    console.log("emitting message");
     setRecentChats([...recentChats, { question }]);
     socket.emit("chat_question", {
       auth_token: getFromLocalStorage(AUTH_KEY),
@@ -93,8 +92,8 @@ const Chats = () => {
         style={{
           position: "fixed",
           bottom: 0,
-          left: "288px",
-          right: "10px",
+          left: "268px",
+          right: "3px",
         }}
       >
         <InputGroup bg="white">

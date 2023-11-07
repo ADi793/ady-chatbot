@@ -1,25 +1,23 @@
 const jwt = require("jsonwebtoken");
 const OpenAI = require("openai");
+const { GPT_MODEL, GPT_ROLE, CHAT_ANSWER } = require("../../utils/constants");
 
 const openai = new OpenAI({
-  apiKey: "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",
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const chatQuestionHandler = async (request, io) => {
   try {
-    const { name, email } = jwt.verify(request.auth_token, "adilsiddiqui");
-    // io.to(`user_${email}`).emit("chat_answer", {
-    //   question: "How are you",
-    //   answer: "fine sir",
-    // });
-    // console.log("decoded", decoded);
+    const { email } = jwt.verify(
+      request.auth_token,
+      process.env.JWT_PRIVATE_KEY
+    );
     const chatCompletion = await openai.chat.completions.create({
-      messages: [{ role: "user", content: request.data.question }],
-      model: "gpt-3.5-turbo",
+      messages: [{ role: GPT_ROLE, content: request.data.question }],
+      model: GPT_MODEL,
     });
 
-    console.log("chatCompletion", chatCompletion.choices[0].message.content);
-    io.to(`user_${email}`).emit("chat_answer", {
+    io.to(`user_${email}`).emit(CHAT_ANSWER, {
       question: request.data.question,
       answer: chatCompletion.choices[0].message.content,
     });

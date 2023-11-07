@@ -5,4 +5,10 @@ const validateUser = Joi.object({
   email: Joi.string().email().min(5).max(255).required(),
 });
 
+const validateChat = Joi.object({
+  question: Joi.string().required(),
+  answer: Joi.string().required(),
+});
+
 module.exports.validateUser = validateUser;
+module.exports.validateChat = validateChat;

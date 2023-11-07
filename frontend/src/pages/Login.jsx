@@ -20,7 +20,7 @@ function Login() {
       console.log(data);
 
       setToLocalStorage(AUTH_KEY, data.auth_token);
-      navigate("/");
+      window.location = "/";
     } catch (error) {
       console.log("Error occured...");
     }
